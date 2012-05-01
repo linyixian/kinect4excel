@@ -58,7 +58,7 @@ namespace kinect4vba
         }
 
         //Bitmapをファイルに保存
-        public Boolean GetPict(string path)
+        public Boolean GetPict(string path, ref string message)
         {
             if (kinect.IsRunning==false)
             {
@@ -71,29 +71,37 @@ namespace kinect4vba
                 {
                     return false;
                 }
-                    
-                byte[] colorPixel = new byte[colorFrame.PixelDataLength];
-                colorFrame.CopyPixelDataTo(colorPixel);
 
-                //ピクセルデータをビットマップに変換
-                Bitmap bitmap =
-                new Bitmap(kinect.ColorStream.FrameWidth,
-                           kinect.ColorStream.FrameHeight,
-                           PixelFormat.Format32bppRgb);
+                try
+                {
+                    byte[] colorPixel = new byte[colorFrame.PixelDataLength];
+                    colorFrame.CopyPixelDataTo(colorPixel);
 
-                Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+                    //ピクセルデータをビットマップに変換
+                    Bitmap bitmap =
+                    new Bitmap(kinect.ColorStream.FrameWidth,
+                               kinect.ColorStream.FrameHeight,
+                               PixelFormat.Format32bppRgb);
 
-                BitmapData data = bitmap.LockBits(rect, ImageLockMode.WriteOnly,
-                    PixelFormat.Format32bppRgb);
+                    Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
 
-                Marshal.Copy(colorPixel, 0, data.Scan0, colorPixel.Length);
+                    BitmapData data = bitmap.LockBits(rect, ImageLockMode.WriteOnly,
+                        PixelFormat.Format32bppRgb);
 
-                bitmap.UnlockBits(data);
+                    Marshal.Copy(colorPixel, 0, data.Scan0, colorPixel.Length);
 
-                //ファイルに保存
-                bitmap.Save(path, ImageFormat.Jpeg);
-                
-                return true;
+                    bitmap.UnlockBits(data);
+
+                    //ファイルに保存
+                    bitmap.Save(path, ImageFormat.Jpeg);
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    message += ex.Message;
+                    return false;
+                }
             }
 
         }
